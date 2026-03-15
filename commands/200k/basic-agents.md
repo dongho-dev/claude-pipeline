@@ -10,8 +10,7 @@
 
 이전 실행이 중단된 경우를 감지한다.
 
-1. `logs/status.json` 존재 확인 → 있으면 이전 상태 로드하여 교차 판단
-2. 없으면 git 상태만으로 판단:
+git 상태로 판단:
 
 ```bash
 git worktree list --porcelain | grep "^worktree" | grep "batch-" | while read _ path; do
@@ -55,28 +54,7 @@ logs/, proposals/, reviews/ 디렉토리 생성:
 mkdir -p logs proposals reviews
 ```
 
-**`logs/status.json` 초기화** — 배치 계획을 파일로 기록:
-
-```json
-{
-  "startedAt": "2026-03-13T10:00:00+09:00",
-  "batches": {
-    "batch-a": {
-      "agentId": null,
-      "status": "pending",
-      "unplannedWrites": [],
-      "workers": {
-        "#263": { "status": "pending", "pr": null, "review": null, "priority": "high", "reviewLevel": "L2" },
-        "#264": { "status": "pending", "pr": null, "review": null, "priority": "medium", "reviewLevel": "L1" }
-      }
-    }
-  },
-  "mergeQueue": []
-}
-```
-
-워커 상태값: `pending` → `in_progress` → `done` → `pr-created` → `reviewing` → `merged` / `BLOCKED` / `failed`.
-세션이 중단되어도 이 파일로 현재 상태를 복원할 수 있다.
+배치 계획은 pipeline CLI의 `review-issues` output(또는 대화 컨텍스트)에 이미 기록되어 있으므로 별도 상태 파일을 생성하지 않는다.
 
 ## Step 2: 오케스트레이터 프롬프트 생성
 
@@ -126,7 +104,7 @@ Agent tool 설정:
 - model: "opus"
 - run_in_background: true
 
-실행 후 agent ID를 배치별로 기록한다. `logs/status.json`의 각 배치에 `agentId`와 `"status": "running"` 업데이트.
+실행 후 agent ID를 배치별로 기록한다 (터미널 출력).
 
 ## Step 4: 모니터링 안내
 
@@ -211,11 +189,7 @@ git diff --name-only main..
 # vs 명세의 Write 파일 목록
 ```
 
-명세에 없던 파일이 변경/생성된 경우, `logs/status.json`의 해당 배치 `unplannedWrites` 배열에 기록:
-
-```json
-"unplannedWrites": ["src/components/layout/price-refresh-button.tsx"]
-```
+명세에 없던 파일이 변경/생성된 경우, 오케스트레이터 완료 리포트에 `unplannedWrites`로 보고한다.
 
 unplannedWrites는 **5-1 리뷰어가 명시적으로 검증**한다 (검증 항목 #5).
 
@@ -275,11 +249,11 @@ node scripts/pipeline-cli.mjs add-tip <category> "<FAIL 핵심 사유 1줄>"
 
 **기본값: Claude는 머지하지 않습니다. 사용자가 명시적으로 "머지해줘" 지시 시에만 의존성 순서대로 `gh pr merge --squash` 실행.** (`--delete-branch` 미사용 — 브랜치 삭제는 Phase 5 worktree-clean에서 일괄 처리.)
 
-PR 생성/머지 시 `logs/status.json` 업데이트: 해당 워커의 `"status": "pr-created"/"merged"`, `"pr": <PR번호>`, `"review": "PASS"/"FAIL"`. 머지된 워커는 `mergeQueue`에 추가.
+PR 생성/머지 결과는 pipeline CLI가 있으면 `complete run-agents` 호출 시 output JSON으로 기록된다.
 
 ## Step 6: 작업 보고서 작성
 
-머지 완료 후 (또는 사용자가 머지 확인 후) `docs/reports/YYYY-MM-DD-{주제}.md` 작성 (경로가 없으면 프로젝트 루트에 생성):
+`/basic-report` 커맨드가 있으면 실행한다. 없으면 아래 구조로 직접 작성 (경로가 없으면 프로젝트 루트에 생성):
 
 ```
 # 작업 보고서: {주제}

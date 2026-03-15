@@ -186,99 +186,15 @@ basic-agents 완료 후 (성공/실패 무관) 잔여 worktree를 정리한다.
 - `.claude/worktrees/` 잔여 디렉토리 삭제
 - 머지 완료된 feature 브랜치 정리
 
-### Phase 6: 회고 보고서
+### Phase 6: 회고 보고서 (/basic-report)
 
-파이프라인 전체 과정을 `docs/reports/YYYY-MM-DD-{주제}.md`에 기록하고 main에 직접 push한다.
-
-**핵심 원칙: 축약 금지.** 대화에서 발생한 모든 의사결정, 수치, 에러, 해결 과정을 그대로 담는다.
-
-보고서 작성 전 CLI가 있으면 `node scripts/pipeline-cli.mjs status`로 전체 흐름 요약을 확인하여 보고서에 반영.
-
-#### 보고서 구조
-
-```markdown
-# 작업 보고서: {주제}
-
-날짜 / 처리 이슈 수 / PR 목록 / 실행 방식
-
-## 우선순위 분포
-
-- priority:high: N개
-- priority:medium: M개
-- priority:low: K개
-
-## Phase별 소요 시간
-
-CLI가 있으면 `node scripts/pipeline-cli.mjs status`의 타임스탬프에서 추출. 없으면 대화 타임스탬프 기반 추정.
-
-| Phase | 시작 | 완료 | 소요 |
-|-------|------|------|------|
-| nextplan | HH:MM | HH:MM | N분 |
-| spec | HH:MM | HH:MM | N분 |
-| review-issues | HH:MM | HH:MM | N분 |
-| run-agents | HH:MM | HH:MM | N분 |
-| worktree-clean | HH:MM | HH:MM | N분 |
-| **총 파이프라인** | | | **N분** |
-
-## 파이프라인 전체 흐름
-
-(Phase별 상세 — 리뷰어 검증 상세, CI 판단 근거 포함)
-
-## 이슈별 상세
-
-각 배치 × 각 이슈: 제목, 변경 파일, 비고
-
-## 명세 외 변경 (unplannedWrites)
-
-| 이슈 | 파일 | 판정 | 사유 |
-
-## 명세 차이 + 특이사항
-
-명세와 다르게 구현됐지만 리뷰어가 PASS 판정한 케이스, 워커가 발견한 프레임워크 제약 등.
-패턴이 반복되면 spec 스킬의 분석 원칙에 체크항목을 추가한다.
-
-## 테스트 수 변화
-
-- 이전: N개 → 이후: M개 (+K개)
-
-## 이전 위험 추적
-
-MEMORY.md (또는 프로젝트의 미처리 이슈 기록)를 참조하여 이전 보고서에서도 언급된 위험의 현재 상태를 표시.
-반복 횟수가 3회 이상이면 "⚠️ 반복"으로 표시.
-
-| 위험 항목 | 최초 보고 | 반복 횟수 | 현재 상태 |
-|----------|----------|----------|----------|
-| ... | YYYY-MM-DD | N회 | 해결/미해결/악화 |
-
-## 잔여 위험 및 후속 과제
-
-- CI pre-existing 실패
-- 허브 이슈 잔여
-- 교훈 (다음 파이프라인에 반영할 것)
-```
-
-#### 교훈 → 시스템 반영
-
-보고서의 "잔여 위험 및 후속 과제"와 "명세 차이 + 특이사항"을 검토하여 시스템에 반영할 항목을 식별:
-
-- **반복 실패 패턴** → tip-pool이 있으면 팁 추가, 없으면 MEMORY/CLAUDE.md에 기록
-- **프로세스 개선** → MEMORY.md feedback에 추가
-- **미처리 이슈 변동** → MEMORY.md 미처리 이슈 갱신 (신규 추가, 해결된 항목 제거)
-- **명세 오류 패턴** → spec 스킬의 분석 원칙에 체크항목 추가 검토
-
-이 단계를 건너뛰면 교훈이 다음 파이프라인에 반영되지 않는다.
-
-#### 실행
+**`/basic-report` 커맨드를 실행한다.** 보고서 템플릿, 데이터 수집 절차, 자기 검증 체크리스트가 모두 커맨드에 내장되어 있으므로 여기서 중복 기술하지 않는다.
 
 ```bash
-git add docs/reports/YYYY-MM-DD-{주제}.md
-git commit -m "docs: YYYY-MM-DD {주제} 회고 보고서 추가
-
-Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>"
-git push
+# 보고서 작성 + 자기 검증 + 교훈 반영 + push까지 /basic-report가 수행
 ```
 
-#### 터미널 완료 요약 (보고서 저장 후 출력)
+보고서 저장 후 터미널 완료 요약 출력:
 
 ```
 ## Pipeline 완료
