@@ -16,7 +16,7 @@ gh label list --json name
 
 ## Step 2: 관심사별 Explore Agent 병렬 실행
 
-6개 관심사 × 관심사당 1개 Explore Agent(model: **sonnet**)를 **병렬로** 실행한다. `$ARGUMENTS`로 영역이 지정된 경우 해당 agent만 실행한다 (예: `security` → Agent B1 + F1만).
+7개 관심사 × 관심사당 1개 Explore Agent(model: **sonnet**)를 **병렬로** 실행한다. `$ARGUMENTS`로 영역이 지정된 경우 해당 agent만 실행한다 (예: `security` → Agent B1 + F1만, `hygiene` → Agent C1만).
 
 **agent 수 조정:** 실행 전 관심사별 대상 파일의 총 크기를 `wc -c`로 측정한다. **2MB당 1 agent** (올림)를 기준으로, 2MB 초과 시 해당 관심사를 디렉토리별로 분할하여 복수 agent를 실행한다.
 
@@ -48,6 +48,19 @@ gh label list --json name
 
 프로젝트에서 UI 컴포넌트, 커스텀 훅, 클라이언트 유틸을 스스로 탐색하여 불필요한 리렌더, 번들 비대화, 테스트 부재, 타입 안전성 문제를 찾는다. 코드를 직접 읽고 문제를 특정하라.
 
+### Cross-layer Agent
+
+#### Agent C1: 코드 위생
+
+프로젝트의 백엔드 + 프론트엔드 소스 코드 전반을 탐색하여 코드 위생 문제를 찾는다. 코드를 직접 읽고 문제를 특정하라.
+
+탐색 대상:
+- 미사용 import / 미사용 변수
+- 도달 불가 코드, 호출되지 않는 export (dead code)
+- 남겨진 console.log / debugger / 주석 처리된 코드 블록
+- TODO/FIXME/HACK 주석 중 실제 작업이 필요한 것
+- 네이밍 불일치 (camelCase/snake_case 혼용 등)
+
 ### Agent 공통 지시
 
 각 Agent에게 전달할 지시:
@@ -78,7 +91,7 @@ UI 라이브러리 프리미티브(shadcn 등)는 감사하지 않는다.
 
 ## Step 3: 발견 통합 + 이슈 그룹핑
 
-6개 Agent 결과를 수집하여:
+7개 Agent 결과를 수집하여:
 
 1. **중복 제거** — 같은 파일:라인이 여러 agent에서 보고된 경우 병합
 2. **크로스 레이어 발견** — 백엔드/프론트엔드 양쪽에서 관련된 문제(예: API 응답 형식 ↔ 프론트 파싱 불일치)는 하나의 이슈로 묶는다
@@ -127,6 +140,7 @@ EOF
 - API 일관성 → `refactor`
 - UX/접근성 → `enhancement`
 - 성능 → `performance`
+- 코드 위생 → `hygiene`
 
 **실행 방식:** 이슈별로 독립된 Bash tool call을 만들어 한 메시지에서 병렬 실행. 에이전트 오버헤드 없이 빠르게 생성.
 
@@ -140,6 +154,7 @@ EOF
   - backend: B개 (보안 X / 에러핸들링 Y / 테스트 Z)
   - frontend: F개 (보안 X / UX Y / 성능 Z)
   - cross-layer: C개
+  - 코드위생: H개
 - 생성 이슈: M개
 - 스킵 (기존 이슈): K개
 - 추정 → 버림: L개

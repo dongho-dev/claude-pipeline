@@ -16,7 +16,7 @@ gh issue list --state open --limit 100 --json number,title,labels
 
 ## Step 2: 관심사별 Explore Agent 병렬 실행
 
-3개 관심사 × 관심사당 1개 Explore Agent(model: **sonnet**)를 **병렬로** 실행한다. `$ARGUMENTS`로 영역이 지정된 경우 해당 agent만 실행한다 (예: `security` → Agent 1만, `performance` → Agent 3만).
+4개 관심사 × 관심사당 1개 Explore Agent(model: **sonnet**)를 **병렬로** 실행한다. `$ARGUMENTS`로 영역이 지정된 경우 해당 agent만 실행한다 (예: `security` → Agent 1만, `performance` → Agent 3만, `hygiene` → Agent 4만).
 
 **agent 수 조정:** 대상 파일이 많아 단일 agent의 컨텍스트로 부족할 경우, 해당 관심사를 디렉토리별로 분할하여 복수 agent를 실행한다.
 
@@ -31,6 +31,10 @@ gh issue list --state open --limit 100 --json number,title,labels
 ### Agent 3: 성능 + 코드 품질
 
 프로젝트에서 UI 컴포넌트, 커스텀 훅, 클라이언트 유틸을 스스로 탐색하여 불필요한 리렌더, 번들 비대화, 테스트 부재, 타입 안전성 문제를 찾는다. 코드를 직접 읽고 문제를 특정하라.
+
+### Agent 4: 코드 위생
+
+프로젝트의 프론트엔드 소스 코드 전반을 탐색하여 코드 위생 문제를 찾는다. 코드를 직접 읽고 문제를 특정하라. 대상: 미사용 import/변수, dead code, console.log/debugger, TODO/FIXME, 네이밍 불일치.
 
 ### Agent 공통 지시
 

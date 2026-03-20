@@ -16,7 +16,7 @@ gh label list --json name
 
 ## Step 2: 관심사별 Explore Agent 병렬 실행
 
-3개 관심사 × 관심사당 1개 Explore Agent(model: **sonnet**)를 **병렬로** 실행한다. `$ARGUMENTS`로 영역이 지정된 경우 해당 agent만 실행한다 (예: `security` → Agent 1만, `performance` → Agent 3만).
+4개 관심사 × 관심사당 1개 Explore Agent(model: **sonnet**)를 **병렬로** 실행한다. `$ARGUMENTS`로 영역이 지정된 경우 해당 agent만 실행한다 (예: `security` → Agent 1만, `performance` → Agent 3만, `hygiene` → Agent 4만).
 
 **agent 수 조정:** 실행 전 관심사별 대상 파일의 총 크기를 `wc -c`로 측정한다. **2MB당 1 agent** (올림)를 기준으로, 2MB 초과 시 해당 관심사를 디렉토리별로 분할하여 복수 agent를 실행한다.
 
@@ -31,6 +31,17 @@ gh label list --json name
 ### Agent 3: 성능 + 코드 품질
 
 프로젝트에서 UI 컴포넌트, 커스텀 훅, 클라이언트 유틸을 스스로 탐색하여 불필요한 리렌더, 번들 비대화, 테스트 부재, 타입 안전성 문제를 찾는다. 코드를 직접 읽고 문제를 특정하라.
+
+### Agent 4: 코드 위생
+
+프로젝트의 프론트엔드 소스 코드 전반을 탐색하여 코드 위생 문제를 찾는다. 코드를 직접 읽고 문제를 특정하라.
+
+탐색 대상:
+- 미사용 import / 미사용 변수
+- 도달 불가 코드, 호출되지 않는 export (dead code)
+- 남겨진 console.log / debugger / 주석 처리된 코드 블록
+- TODO/FIXME/HACK 주석 중 실제 작업이 필요한 것
+- 네이밍 불일치 (camelCase/snake_case 혼용 등)
 
 ### Agent 공통 지시
 
@@ -108,6 +119,7 @@ EOF
 - 성능 → `performance`
 - 테스트 부재 → `test`
 - 코드 품질 → `refactor`
+- 코드 위생 → `hygiene`
 
 **실행 방식:** 이슈별로 독립된 Bash tool call을 만들어 한 메시지에서 병렬 실행. 에이전트 오버헤드 없이 빠르게 생성.
 
@@ -117,7 +129,7 @@ EOF
 ## 감사 완료
 
 - 탐색 영역: frontend
-- 발견 항목: N개 (보안 X / UX Y / 성능 Z)
+- 발견 항목: N개 (보안 X / UX Y / 성능 Z / 코드위생 W)
 - 생성 이슈: M개
 - 스킵 (기존 이슈): K개
 - 추정 → 버림: L개
